@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<title>HartaKu Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HartaKu">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0b0d; --card:#18181c; --card2:#222228; --line:#2c2c33; --text:#f4f4f6; --muted:#9a9aa6;
+  --accent:#2bb3a3; --accent-ink:#06201d; --green:#3ccf91; --red:#f07178; --warn:#f4b860;
+  --radius:18px; color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f4f5f7; --card:#ffffff; --card2:#f0f1f4; --line:#e3e4e8; --text:#17171c; --muted:#6b6b78;
+  --accent:#138a7d; --accent-ink:#ffffff; --green:#178a5a; --red:#c9424b; --warn:#a86a00; color-scheme:light;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f4f5f7; --card:#ffffff; --card2:#f0f1f4; --line:#e3e4e8; --text:#17171c; --muted:#6b6b78;
+    --accent:#138a7d; --accent-ink:#ffffff; --green:#178a5a; --red:#c9424b; --warn:#a86a00; color-scheme:light;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:Nunito,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100dvh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select{font:inherit;color:var(--text)}
+.app{max-width:520px;margin:0 auto;padding:16px 16px 170px}
+.brand{text-align:center;font-weight:800;font-size:26px;color:var(--accent);padding:6px 0 14px;border-bottom:1px solid var(--line);letter-spacing:.3px}
+.brand span{color:var(--text)}
+h1{font-size:26px;font-weight:700;text-align:center;margin:4px 0 2px}
+.sub{color:var(--muted);text-align:center;font-size:14px;margin-bottom:18px}
+.date{color:var(--muted);text-transform:uppercase;font-size:13px;letter-spacing:.6px;margin-top:16px}
+.welcome{font-size:24px;font-weight:700;margin-bottom:18px}
+.label{text-transform:uppercase;font-size:12.5px;letter-spacing:.7px;color:var(--muted);margin:22px 4px 8px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.nw{display:flex;justify-content:space-between;align-items:flex-start}
+.nw .big{font-size:36px;font-weight:800;line-height:1.1;word-break:break-all}
+.nw small{display:block;color:var(--muted);margin-top:6px}
+.eye{width:42px;height:42px;border-radius:50%;background:var(--card2);display:grid;place-items:center;flex-shrink:0}
+.split{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+.split>div+div{border-left:1px solid var(--line);padding-left:16px}
+.split small{color:var(--muted);display:block;margin-bottom:4px}
+.pos{color:var(--green)} .neg{color:var(--red)} .muted{color:var(--muted)}
+.list{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:14px 16px;width:100%;text-align:left}
+.row+.row{border-top:1px solid var(--line)}
+.row .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--card2);flex-shrink:0}
+.row .grow{flex:1;min-width:0}
+.row .grow b{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .grow small{color:var(--muted)}
+.row .val{font-weight:700;text-align:right;white-space:nowrap}
+.chev{color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:40px 16px}
+.empty .art{font-size:64px;margin-bottom:10px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;width:60px;height:60px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:32px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:5}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:calc(100% - 32px);max-width:488px;background:var(--card2);border:1px solid var(--line);border-radius:28px;display:grid;grid-template-columns:repeat(4,1fr);padding:6px;z-index:4}
+nav.tabs button{padding:8px 0;border-radius:22px;color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button.on{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--text)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:left;min-height:150px;display:flex;flex-direction:column}
+.tool .art{font-size:40px;margin-bottom:auto}
+.tool b{font-size:16px;margin-top:12px}
+.tool small{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.35}
+.fine{color:var(--muted);font-size:13px;margin:12px 4px;line-height:1.45}
+.topbar{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;margin-bottom:12px}
+.topbar h2{text-align:center;font-size:20px}
+.back{font-size:26px;color:var(--accent);height:40px}
+.field{display:flex;align-items:center;gap:8px;padding:12px 16px}
+.field+.field{border-top:1px solid var(--line)}
+.field label{flex:1;font-weight:600}
+.field .unit{color:var(--muted);font-size:14px;white-space:nowrap}
+.field input{width:110px;background:transparent;border:0;text-align:right;font-size:16px;outline:none}
+.field input::placeholder{color:var(--muted)}
+.result{min-height:64px}
+.result .big{font-size:28px;font-weight:800}
+.kv{display:flex;justify-content:space-between;padding:6px 0;gap:12px}
+.kv span:first-child{color:var(--muted)}
+.bar{height:10px;border-radius:6px;background:var(--card2);overflow:hidden;margin:12px 0 6px;display:flex}
+.bar i{display:block;height:100%}
+.btn{width:100%;padding:14px;border-radius:30px;border:1px solid var(--line);font-weight:700;margin-top:18px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--red)}
+.link{color:var(--accent);font-weight:700;padding:10px 4px;font-size:14px}
+.chart{width:100%;height:auto;display:block}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card2);border-radius:14px;padding:4px;margin-bottom:12px}
+.seg button{padding:10px;border-radius:11px;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+dialog{border:0;background:transparent;margin:auto auto 0;width:100%;max-width:520px;padding:0;color:var(--text)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.sheet{background:var(--card);border-radius:22px 22px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));border:1px solid var(--line)}
+.sheet h3{font-size:19px;margin-bottom:14px}
+.sheet .in{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);font-size:16px;margin-bottom:12px;outline:none}
+.sheet .in:focus{border-color:var(--accent)}
+.sheet .lbl{font-size:13px;color:var(--muted);margin:0 2px 6px;display:block}
+.sheet .acts{display:flex;gap:10px}
+.sheet .acts .btn{margin-top:6px}
+.toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:20px;font-weight:700;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+.toast.show{opacity:1}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<button class="fab" id="fab" aria-label="Add account">+</button>
+<nav class="tabs" id="tabs"></nav>
+<dialog id="dlg"><div class="sheet" id="sheet"></div></dialog>
+<input type="file" id="file" accept=".json,application/json" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- State ---------- */
+const KEY = 'hartaku.v1';
+const DEF = {name:'', currency:'MYR', theme:'system', hide:false, accounts:[], history:{}, target:null};
+const CUR = {MYR:'RM', USD:'$', SGD:'S$', IDR:'Rp', EUR:'€', GBP:'£', AUD:'A$'};
+const CATS = {
+  asset:     [['Savings','🏦'],['Investments','📈'],['EPF / KWSP','🧾'],['ASB / Unit Trust','💼'],['Property','🏠'],['Vehicle','🚗'],['Gold','🪙'],['Cash','💵'],['Other','📦']],
+  liability: [['Mortgage','🏡'],['Car Loan','🚙'],['Personal Loan','📄'],['PTPTN','🎓'],['Credit Card','💳'],['BNPL','🛍️'],['Other','📦']]
+};
+let S = load();
+let tab = 'overview', tool = null;
+const toolVals = {};
+
+function load(){
+  try { const d = JSON.parse(localStorage.getItem(KEY)); return Object.assign({}, DEF, d || {}); }
+  catch { return {...DEF}; }
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} }
+const today = () => new Date().toLocaleDateString('en-CA');
+const uid = () => Math.random().toString(36).slice(2, 10);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isFinite(n) ? n : 0; };
+const sym = () => CUR[S.currency] || S.currency;
+const money = (n, force) => (!force && S.hide) ? sym() + ' ••••' :
+  (n < 0 ? '-' : '') + sym() + ' ' + Math.abs(Math.round(n)).toLocaleString('en-MY');
+function totals(){
+  let a = 0, l = 0;
+  for (const x of S.accounts) x.kind === 'asset' ? a += num(x.balance) : l += num(x.balance);
+  return {a, l, n: a - l};
+}
+function snapshot(){ const t = totals(); S.history[today()] = {a:t.a, l:t.l}; save(); }
+function catIcon(kind, cat){ return (CATS[kind].find(c => c[0] === cat) || ['','📦'])[1]; }
+function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
+function applyTheme(){ const r = document.documentElement; S.theme === 'system' ? r.removeAttribute('data-theme') : r.setAttribute('data-theme', S.theme); }
+const ym = d => { const [y,m] = d.split('-'); return new Date(+y, +m - 1, 1).toLocaleDateString('en-MY', {month:'short', year:'numeric'}); };
+function addMonths(m){ const d = new Date(); d.setMonth(d.getMonth() + m); return d.toLocaleDateString('en-MY', {month:'long', year:'numeric'}); }
+function dur(m){ const y = Math.floor(m / 12), r = m % 12; return [y ? y + (y > 1 ? ' years' : ' year') : '', r ? r + (r > 1 ? ' months' : ' month') : ''].filter(Boolean).join(' ') || 'now'; }
+
+/* ---------- Icons ---------- */
+const IC = {
+  overview:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>',
+  history:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>',
+  tools:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  eye:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.9 17.9A10 10 0 0 1 12 20c-7 0-11-8-11-8a18 18 0 0 1 5.1-5.9M9.9 4.2A9 9 0 0 1 12 4c7 0 11 8 11 8a18 18 0 0 1-2.2 3.2M1 1l22 22"/></svg>'
+};
+
+/* ---------- Render ---------- */
+function render(){
+  applyTheme();
+  document.getElementById('tabs').innerHTML = ['overview','history','tools','settings'].map(t =>
+    `<button class="${tab === t ? 'on' : ''}" data-tab="${t}">${IC[t]}<span>${t[0].toUpperCase() + t.slice(1)}</span></button>`).join('');
+  document.getElementById('fab').style.display = tab === 'overview' ? '' : 'none';
+  const app = document.getElementById('app');
+  app.innerHTML = tab === 'overview' ? vOverview() : tab === 'history' ? vHistory() : tab === 'tools' ? (tool ? vTool() : vTools()) : vSettings();
+  if (tab === 'tools' && tool) calcTool();
+  window.scrollTo(0, 0);
+}
+
+function vOverview(){
+  const t = totals();
+  const d = new Date().toLocaleDateString('en-MY', {weekday:'long', month:'long', day:'numeric'});
+  const group = kind => {
+    const xs = S.accounts.filter(a => a.kind === kind);
+    if (!xs.length) return '';
+    return `<div class="label">${kind === 'asset' ? 'Assets' : 'Liabilities'}</div><div class="list">` + xs.map(a => `
+      <button class="row" data-edit="${a.id}">
+        <span class="ic">${catIcon(a.kind, a.cat)}</span>
+        <span class="grow"><b>${esc(a.name)}</b><small>${esc(a.cat)} · ${a.updated ? new Date(a.updated).toLocaleDateString('en-MY', {day:'numeric', month:'short'}) : '-'}</small></span>
+        <span class="val ${kind === 'asset' ? 'pos' : 'neg'}">${money(num(a.balance))}</span>
+      </button>`).join('') + '</div>';
+  };
+  return `
+    <div class="brand">Harta<span>Ku</span></div>
+    <div class="date">${esc(d)}</div>
+    <div class="welcome">Welcome${S.name ? ', ' + esc(S.name) : ''}</div>
+    <div class="label">Net worth</div>
+    <div class="card">
+      <div class="nw"><div><div class="big">${money(t.n)}</div><small>Assets minus liabilities</small></div>
+        <button class="eye" id="eye" aria-label="Hide amounts">${S.hide ? IC.eyeOff : IC.eye}</button></div>
+      <div class="split"><div><small>Assets</small><b class="pos">${money(t.a)}</b></div><div><small>Liabilities</small><b class="neg">${money(t.l)}</b></div></div>
+    </div>
+    ${S.accounts.length ? group('asset') + group('liability') + '<p class="fine">Tap an account to update its balance. Each change is saved to History for today.</p>'
+      : `<div class="empty"><div class="art">🏠🚗🌱</div>What do you own and owe?<br>Tap <b>+</b> to add your first account.</div>`}`;
+}
+
+function vHistory(){
+  const days = Object.keys(S.history).sort();
+  if (!days.length) return `<h1>History</h1><div class="sub">Your net worth journey</div>
+    <div class="empty"><div class="art">📊</div>Add an account to start your history.</div>`;
+  // one point per month (latest snapshot in that month) + every point if few
+  const pts = days.map(d => ({d, n: S.history[d].a - S.history[d].l, a: S.history[d].a, l: S.history[d].l}));
+  const monthly = {}; pts.forEach(p => monthly[p.d.slice(0, 7)] = p);
+  const months = Object.values(monthly);
+  const first = pts[0], last = pts[pts.length - 1], ch = last.n - first.n;
+  const rows = months.slice().reverse().map((p, i, arr) => {
+    const prev = arr[i + 1]; const delta = prev ? p.n - prev.n : null;
+    return `<div class="row"><span class="grow"><b>${ym(p.d)}</b><small>Assets ${money(p.a)} · Debts ${money(p.l)}</small></span>
+      <span class="val">${money(p.n)}${delta !== null ? `<br><small class="${delta >= 0 ? 'pos' : 'neg'}">${delta >= 0 ? '+' : ''}${S.hide ? '••' : Math.round(delta).toLocaleString('en-MY')}</small>` : ''}</span></div>`;
+  }).join('');
+  return `<h1>History</h1><div class="sub">Your net worth journey</div>
+    <div class="card">
+      <small class="muted">Net worth now</small>
+      <div style="font-size:30px;font-weight:800">${money(last.n)}</div>
+      <small class="${ch >= 0 ? 'pos' : 'neg'}">${ch >= 0 ? '▲' : '▼'} ${money(Math.abs(ch))} since ${new Date(first.d).toLocaleDateString('en-MY', {day:'numeric', month:'short', year:'numeric'})}</small>
+      <div style="margin-top:14px">${chart(pts)}</div>
+    </div>
+    <div class="label">By month</div><div class="list">${rows}</div>
+    <p class="fine">One snapshot is saved per day, whenever you add or update an account.</p>`;
+}
+
+function chart(pts){
+  const W = 340, H = 150, P = 6;
+  const ys = pts.map(p => p.n); let mn = Math.min(...ys), mx = Math.max(...ys);
+  if (mn === mx) { mn -= 1; mx += 1; }
+  const t0 = new Date(pts[0].d).getTime(), t1 = new Date(pts[pts.length - 1].d).getTime() || t0 + 1;
+  const x = p => pts.length === 1 ? W / 2 : P + (new Date(p.d).getTime() - t0) / ((t1 - t0) || 1) * (W - 2 * P);
+  const y = p => P + (1 - (p.n - mn) / (mx - mn)) * (H - 2 * P);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + x(p).toFixed(1) + ' ' + y(p).toFixed(1)).join(' ');
+  const area = pts.length > 1 ? `<path d="${line} L${x(pts[pts.length - 1]).toFixed(1)} ${H} L${x(pts[0]).toFixed(1)} ${H} Z" fill="url(#g)"/>` : '';
+  const lp = pts[pts.length - 1];
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Net worth over time">
+    <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+    ${area}<path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${x(lp)}" cy="${y(lp)}" r="4.5" fill="var(--accent)"/></svg>`;
+}
+
+/* ---------- Tools ---------- */
+const TOOLS = {
+  target: {title:'Net Worth Target', art:'🎯', desc:'How far you are from your target net worth',
+    fields:[['target','Target amount','cur'],['monthly','Monthly savings','cur'],['growth','Expected growth','%']],
+    note:'Add your monthly savings and a growth rate to see how long it could take. Include what you pay off your loans each month. Investment returns go in Expected growth.'},
+  compound: {title:'Compound Growth', art:'🌱', desc:'How your savings or investments could grow over time',
+    fields:[['start','Starting amount','cur'],['monthly','Monthly contribution','cur'],['growth','Annual growth','%'],['years','Time','years']]},
+  retire: {title:'Retirement', art:'🏖️', desc:'How much you need to retire comfortably',
+    fields:[['savings','Retirement savings','cur'],['age','Current age','age'],['retAge','Retirement age','age'],['spend','Spending in retirement','curm'],['growth','Expected growth','%'],['infl','Inflation','%opt']],
+    note:'How much you\'d spend each month after retiring, in today\'s money. Uses the 4% rule (you need about 25× your yearly spending). Inflation is optional.'},
+  debt: {title:'Debt Payoff', art:'💳', desc:'How long it could take to clear a debt',
+    fields:[['bal','Debt balance','cur'],['pay','Monthly payment','cur'],['rate','Interest rate','%']]}
+};
+
+function vTools(){
+  return `<h1>Tools</h1><div class="sub">Which one shall we try?</div>
+    <div class="grid2">${Object.entries(TOOLS).map(([k, t]) =>
+      `<button class="tool" data-tool="${k}"><span class="art">${t.art}</span><b>${t.title}</b><small>${t.desc}</small></button>`).join('')}</div>
+    <p class="fine">Planning estimates only, not financial advice. Everything stays on this device; only a target you save is kept.</p>`;
+}
+
+function vTool(){
+  const t = TOOLS[tool], v = toolVals[tool] || (toolVals[tool] = tool === 'target' && S.target ? {...S.target} : {});
+  const unit = u => ({cur:[sym(), ''], curm:[sym(), '/ month'], '%':['', '% a year'], '%opt':['', '% a year'], years:['', 'years'], age:['', 'years']}[u]);
+  let head = '';
+  if (tool === 'target') {
+    head = `<div class="card nw" style="align-items:center"><div><b>Your net worth</b><small>${v.useOwn ? 'Using your own amount' : 'Updates automatically from Overview'}</small></div><b>${money(totals().n)}</b></div>
+      <button class="link" id="useOwn">${v.useOwn ? 'Use my Overview net worth' : 'Use a different amount'}</button>`;
+  }
+  const fields = (tool === 'target' && v.useOwn ? [['own','Current net worth','cur']] : []).concat(t.fields);
+  return `<div class="topbar"><button class="back" id="back" aria-label="Back">‹</button><h2>${t.title}</h2><span></span></div>
+    ${head}
+    <div class="label">Your numbers</div>
+    <div class="list">${fields.map(([k, label, u]) => { const [pre, suf] = unit(u); return `
+      <div class="field"><label for="f_${k}">${label}</label>${pre ? `<span class="unit">${pre}</span>` : ''}
+      <input id="f_${k}" data-k="${k}" inputmode="decimal" placeholder="${u === '%opt' ? 'Optional' : '0'}" value="${esc(v[k] ?? '')}">${suf ? `<span class="unit">${suf}</span>` : ''}</div>`; }).join('')}</div>
+    ${t.note ? `<p class="fine">${t.note}</p>` : ''}
+    <div class="label">Result</div>
+    <div class="card result" id="result"></div>
+    ${tool === 'target' ? '<button class="btn primary" id="saveTarget">Save target</button>' : ''}
+    <button class="btn" id="resetTool">Reset</button>`;
+}
+
+function calcTool(){
+  const v = toolVals[tool] || {}, el = document.getElementById('result');
+  const g = k => num(v[k]);
+  const kv = (a, b, c = '') => `<div class="kv"><span>${a}</span><b class="${c}">${b}</b></div>`;
+  let h = '';
+  if (tool === 'target') {
+    const cur = v.useOwn ? g('own') : totals().n, T = g('target'), pmt = g('monthly'), r = g('growth') / 1200;
+    if (T <= 0) h = '<span class="muted">Enter a target net worth to see your progress.</span>';
+    else {
+      const pct = Math.max(0, Math.min(100, cur / T * 100));
+      h = `<div class="big">${pct.toFixed(1)}%</div><span class="muted">of the way to ${money(T, true)}</span>
+        <div class="bar"><i style="width:${pct}%;background:var(--accent)"></i></div>`;
+      if (cur >= T) h += kv('Status', 'Target reached 🎉', 'pos');
+      else {
+        h += kv('Still to go', money(T - cur, true));
+        if (pmt <= 0 && r <= 0) h += '<p class="fine" style="margin:8px 0 0">Add monthly savings or growth to see how long it could take.</p>';
+        else {
+          let x = cur, m = 0;
+          while (x < T && m < 1200) { x = x * (1 + r) + pmt; m++; }
+          h += m >= 1200 ? kv('Time needed', 'More than 100 years', 'neg') : kv('Time needed', dur(m)) + kv('Around', addMonths(m));
+        }
+      }
+    }
+  }
+  if (tool === 'compound') {
+    const P = g('start'), pmt = g('monthly'), r = g('growth') / 1200, y = Math.round(g('years'));
+    if (y < 1 || y > 60) h = '<span class="muted">Enter how many years (1 to 60) to see a projection.</span>';
+    else {
+      let x = P; for (let i = 0; i < y * 12; i++) x = x * (1 + r) + pmt;
+      const paid = P + pmt * 12 * y, grow = x - paid, pp = x > 0 ? paid / x * 100 : 0;
+      h = `<span class="muted">After ${y} year${y > 1 ? 's' : ''}</span><div class="big">${money(x, true)}</div>
+        <div class="bar"><i style="width:${pp}%;background:var(--muted)"></i><i style="width:${100 - pp}%;background:var(--accent)"></i></div>
+        ${kv('You put in', money(paid, true))}${kv('Growth', money(grow, true), 'pos')}`;
+    }
+  }
+  if (tool === 'retire') {
+    const age = g('age'), ra = g('retAge'), sav = g('savings'), sp = g('spend'), gr = g('growth') / 100, inf = g('infl') / 100;
+    if (!(age > 0 && ra > age && ra <= 100)) h = '<span class="muted">Enter your age and a later retirement age (up to 100).</span>';
+    else if (sp <= 0) h = '<span class="muted">Enter how much you\'d spend each month in retirement.</span>';
+    else {
+      const n = ra - age, spendAt = sp * Math.pow(1 + inf, n), need = spendAt * 12 * 25, have = sav * Math.pow(1 + gr, n), gap = need - have;
+      h = `<span class="muted">You'd need about</span><div class="big">${money(need, true)}</div><span class="muted">by age ${ra} (in ${n} years)</span>
+        <div style="margin-top:10px">${inf > 0 ? kv('Monthly spending then', money(spendAt, true)) : ''}${kv('Your savings could grow to', money(have, true))}`;
+      if (gap <= 0) h += kv('Status', 'On track 🎉', 'pos');
+      else {
+        const r = gr / 12, m = n * 12, monthly = r > 0 ? gap * r / (Math.pow(1 + r, m) - 1) : gap / m;
+        h += kv('Shortfall', money(gap, true), 'neg') + kv('Save each month', money(monthly, true));
+      }
+      h += '</div>';
+    }
+  }
+  if (tool === 'debt') {
+    const B = g('bal'), pmt = g('pay'), r = g('rate') / 1200;
+    if (B <= 0) h = '<span class="muted">Enter the debt balance.</span>';
+    else if (pmt <= 0) h = '<span class="muted">Enter your monthly payment.</span>';
+    else if (pmt <= B * r) h = `<span class="neg">This payment doesn't cover the interest (${money(B * r, true)} a month). Pay more than that to clear the debt.</span>`;
+    else {
+      let b = B, m = 0, int = 0;
+      while (b > 0.005 && m < 1200) { const i = b * r; int += i; b = b + i - pmt; m++; }
+      h = `<span class="muted">Debt-free in</span><div class="big">${dur(m)}</div><span class="muted">around ${addMonths(m)}</span>
+        <div style="margin-top:10px">${kv('Total interest', money(int, true), 'neg')}${kv('Total paid', money(B + int, true))}</div>`;
+    }
+  }
+  el.innerHTML = h;
+}
+
+/* ---------- Settings ---------- */
+function vSettings(){
+  const r = (id, ic, label, val = '', cls = '') => `<button class="row" id="${id}"><span class="ic">${ic}</span><span class="grow"><b class="${cls}">${label}</b></span><span class="muted">${esc(val)}</span><span class="chev">›</span></button>`;
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const install = standalone ? '' : `<div class="label">App</div><div class="list">${r('sInstall', '📲', 'Install on this phone', installEvt ? '' : 'How?')}</div>
+    <p class="fine">Adds HartaKu to your home screen so it opens like a normal app and works offline.</p>`;
+  return `<h1>Settings</h1>${install}
+    <div class="label">General</div><div class="list">
+      ${r('sName', '👤', 'Name', S.name || 'Not set')}
+      ${r('sCur', '💱', 'Currency', S.currency + ' · ' + sym())}
+      ${r('sTheme', '🌙', 'Appearance', {system:'Follow device', dark:'Dark', light:'Light'}[S.theme])}
+    </div>
+    <div class="label">Your data</div><div class="list">
+      ${r('sExport', '📤', 'Export backup')}
+      ${r('sImport', '📥', 'Restore from backup')}
+      ${r('sCsv', '📄', 'Export history (CSV)')}
+    </div>
+    <p class="fine">Backups are protected with a password you choose. Restoring replaces your data on this device.</p>
+    <div class="list">${r('sReset', '🗑️', 'Reset all data', '', 'neg')}</div>
+    <p class="fine">Deletes all data on this device and starts fresh.</p>
+    <div class="foot">Kept in this browser only: no account or bank connection.<br>${S.accounts.length} account${S.accounts.length === 1 ? '' : 's'} · ${Object.keys(S.history).length} snapshot${Object.keys(S.history).length === 1 ? '' : 's'}</div>`;
+}
+
+/* ---------- Sheet (modal) ---------- */
+const dlg = document.getElementById('dlg'), sheet = document.getElementById('sheet');
+function openSheet(html, bind){ sheet.innerHTML = html; dlg.showModal(); bind && bind(sheet); }
+function closeSheet(){ dlg.close(); }
+dlg.addEventListener('click', e => { if (e.target === dlg) closeSheet(); });
+
+function accountSheet(id){
+  const a = S.accounts.find(x => x.id === id);
+  let kind = a ? a.kind : 'asset';
+  const cats = k => CATS[k].map(([c, i]) => `<option ${a && a.cat === c ? 'selected' : ''}>${c}</option>`).join('');
+  openSheet(`<h3>${a ? 'Update account' : 'Add account'}</h3>
+    <div class="seg"><button data-k="asset">Asset</button><button data-k="liability">Liability</button></div>
+    <label class="lbl">Category</label><select class="in" id="aCat"></select>
+    <label class="lbl">Name</label><input class="in" id="aName" maxlength="40" placeholder="e.g. Maybank savings" value="${a ? esc(a.name) : ''}">
+    <label class="lbl" id="aBalL">Balance (${sym()})</label><input class="in" id="aBal" inputmode="decimal" placeholder="0" value="${a ? a.balance : ''}">
+    <div class="acts">${a ? '<button class="btn danger" id="aDel">Delete</button>' : '<button class="btn" id="aCancel">Cancel</button>'}<button class="btn primary" id="aSave">Save</button></div>`,
+    s => {
+      const setKind = k => { kind = k; s.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+        s.querySelector('#aCat').innerHTML = cats(k); s.querySelector('#aBalL').textContent = (k === 'asset' ? 'Value' : 'Amount owed') + ` (${sym()})`; };
+      setKind(kind);
+      s.querySelectorAll('.seg button').forEach(b => b.onclick = () => setKind(b.dataset.k));
+      if (!a) s.querySelector('#aCancel').onclick = closeSheet;
+      else s.querySelector('#aDel').onclick = () => {
+        if (!confirm(`Delete "${a.name}"? Past history snapshots are kept.`)) return;
+        S.accounts = S.accounts.filter(x => x.id !== id); snapshot(); closeSheet(); render(); toast('Account deleted');
+      };
+      s.querySelector('#aSave').onclick = () => {
+        const name = s.querySelector('#aName').value.trim() || s.querySelector('#aCat').value;
+        const bal = Math.abs(num(s.querySelector('#aBal').value));
+        const rec = {id: a ? a.id : uid(), kind, cat: s.querySelector('#aCat').value, name, balance: bal, updated: today()};
+        if (a) Object.assign(a, rec); else S.accounts.push(rec);
+        snapshot(); closeSheet(); render(); toast(a ? 'Balance updated' : 'Account added');
+      };
+      setTimeout(() => s.querySelector(a ? '#aBal' : '#aName').focus(), 50);
+    });
+}
+
+function inputSheet(title, html, onOk){
+  openSheet(`<h3>${title}</h3>${html}<div class="acts"><button class="btn" id="xC">Cancel</button><button class="btn primary" id="xO">OK</button></div>`, s => {
+    s.querySelector('#xC').onclick = closeSheet;
+    s.querySelector('#xO').onclick = () => onOk(s);
+    const f = s.querySelector('.in'); f && setTimeout(() => f.focus(), 50);
+    s.querySelectorAll('input.in').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') onOk(s); });
+  });
+}
+
+/* ---------- Backup (AES-GCM, PBKDF2) ---------- */
+const b64 = u8 => { let s = ''; u8.forEach(b => s += String.fromCharCode(b)); return btoa(s); };
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function keyFrom(pw, salt){
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:200000, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['encrypt', 'decrypt']);
+}
+async function encrypt(obj, pw){
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, await keyFrom(pw, salt), new TextEncoder().encode(JSON.stringify(obj)));
+  return {app:'hartaku', v:1, salt:b64(salt), iv:b64(iv), data:b64(new Uint8Array(ct))};
+}
+async function decrypt(f, pw){
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:unb64(f.iv)}, await keyFrom(pw, unb64(f.salt)), unb64(f.data));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function download(name, text, type){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+/* ---------- Events ---------- */
+document.getElementById('tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) { tab = b.dataset.tab; tool = null; render(); } };
+document.getElementById('fab').onclick = () => accountSheet();
+document.getElementById('app').addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  if (t.dataset.edit) return accountSheet(t.dataset.edit);
+  if (t.dataset.tool) { tool = t.dataset.tool; return render(); }
+  switch (t.id) {
+    case 'eye': S.hide = !S.hide; save(); return render();
+    case 'back': tool = null; return render();
+    case 'useOwn': toolVals.target.useOwn = !toolVals.target.useOwn; return render();
+    case 'resetTool': toolVals[tool] = {}; if (tool === 'target') { S.target = null; save(); } return render();
+    case 'saveTarget': S.target = {...toolVals.target}; save(); return toast('Target saved on this device');
+    case 'sName': return inputSheet('Your name', `<input class="in" id="v" maxlength="30" value="${esc(S.name)}">`, s => { S.name = s.querySelector('#v').value.trim(); save(); closeSheet(); render(); });
+    case 'sCur': return inputSheet('Currency', `<select class="in" id="v">${Object.entries(CUR).map(([c, y]) => `<option value="${c}" ${c === S.currency ? 'selected' : ''}>${c} · ${y}</option>`).join('')}</select>
+        <p class="fine" style="margin-top:0">Only changes the symbol shown. Amounts are not converted.</p>`, s => { S.currency = s.querySelector('#v').value; save(); closeSheet(); render(); });
+    case 'sTheme': S.theme = {system:'dark', dark:'light', light:'system'}[S.theme]; save(); return render();
+    case 'sExport':
+      if (!crypto.subtle) return toast('Backups need https or a local file');
+      return inputSheet('Export backup', `<label class="lbl">Choose a password (min 6 characters)</label><input class="in" id="p1" type="password" autocomplete="new-password">
+        <label class="lbl">Confirm password</label><input class="in" id="p2" type="password" autocomplete="new-password">
+        <p class="fine" style="margin-top:0">You'll need this password to restore. It can't be recovered.</p>`, async s => {
+          const p1 = s.querySelector('#p1').value, p2 = s.querySelector('#p2').value;
+          if (p1.length < 6) return toast('Password too short');
+          if (p1 !== p2) return toast('Passwords don\'t match');
+          const f = await encrypt(S, p1); download(`hartaku-backup-${today()}.json`, JSON.stringify(f), 'application/json'); closeSheet(); toast('Backup saved');
+        });
+    case 'sInstall':
+      if (installEvt) { installEvt.prompt(); installEvt.userChoice.finally(() => { installEvt = null; render(); }); return; }
+      return openSheet(`<h3>Install HartaKu</h3>
+        <p class="fine" style="margin:0 0 10px"><b>Android (Chrome):</b> tap the ⋮ menu at the top right, then <b>Install app</b> or <b>Add to Home screen</b>.</p>
+        <p class="fine" style="margin:0 0 10px"><b>iPhone (Safari):</b> tap the Share button, then <b>Add to Home Screen</b>.</p>
+        <p class="fine" style="margin:0 0 6px">The page must be opened from an https:// link for this to work.</p>
+        <button class="btn primary" id="xC">OK</button>`, s => s.querySelector('#xC').onclick = closeSheet);
+    case 'sImport': return document.getElementById('file').click();
+    case 'sCsv': {
+      const days = Object.keys(S.history).sort();
+      if (!days.length) return toast('No history yet');
+      const csv = 'date,assets,liabilities,net_worth\n' + days.map(d => `${d},${S.history[d].a},${S.history[d].l},${S.history[d].a - S.history[d].l}`).join('\n');
+      download(`hartaku-history-${today()}.csv`, csv, 'text/csv'); return toast('CSV exported');
+    }
+    case 'sReset':
+      if (!confirm('Delete ALL accounts, history and settings on this device? This cannot be undone.')) return;
+      S = {...DEF, accounts:[], history:{}}; save(); for (const k in toolVals) delete toolVals[k]; tab = 'overview'; render(); return toast('All data cleared');
+  }
+});
+document.getElementById('app').addEventListener('input', e => {
+  const k = e.target.dataset.k; if (!k || !tool) return;
+  (toolVals[tool] ||= {})[k] = e.target.value; calcTool();
+});
+document.getElementById('file').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  let data; try { data = JSON.parse(await f.text()); } catch { return toast('Not a valid backup file'); }
+  if (data.app !== 'hartaku' || !data.data) return toast('Not a HartaKu backup');
+  inputSheet('Restore backup', `<label class="lbl">Backup password</label><input class="in" id="p" type="password">
+    <p class="fine" style="margin-top:0">This replaces all data on this device.</p>`, async s => {
+    try {
+      const d = await decrypt(data, s.querySelector('#p').value);
+      if (!Array.isArray(d.accounts)) throw 0;
+      S = Object.assign({}, DEF, d); save(); closeSheet(); tab = 'overview'; render(); toast('Backup restored');
+    } catch { toast('Wrong password or damaged file'); }
+  });
+};
+matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', render);
+
+/* ---------- PWA ---------- */
+let installEvt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (tab === 'settings') render(); });
+addEventListener('appinstalled', () => { installEvt = null; toast('HartaKu installed'); });
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+// Ask the browser not to clear our data when storage runs low.
+navigator.storage?.persist?.().catch(() => {});
+
+render();
+if (!S.name && !S.accounts.length) inputSheet('Welcome! What should we call you?', '<input class="in" id="v" maxlength="30" placeholder="Your name">', s => { S.name = s.querySelector('#v').value.trim(); save(); closeSheet(); render(); });
+</script>
+</body>
+</html>
